@@ -1,5 +1,15 @@
-from fastapi import FastAPI, Body
+from typing import Optional
+from fastapi import FastAPI, Body, Path, Query
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
+
+class Movie(BaseModel):
+    id: Optional[int]
+    title:str = Field(max_length=15)
+    overview:str
+    year:str
+    rating: int
+    category: str
 
 
 app = FastAPI()
@@ -46,37 +56,30 @@ def get_movie(id: int):
 
 
 @app.get("/movies/", tags=["movies"])
-def get_movie_by_category(category: str):
+def get_movie_by_category(category: str = Query(min_length=5, max_length=15)):
     movies_by_categories = list(
         filter(lambda x: x["category"] == category, movies))
     return movies_by_categories
 
 
 @app.post("/movies", tags=["movies"])
-def create_movie(id: int = Body(), title: str = Body(),
-                 overview: str = Body(), rating: str = Body(), year: int = Body(), category: str = Body()):
+def create_movie(movie: Movie):
     movies.append(
-        {"id": id,
-         "title": title,
-         "overview": overview,
-         "year": year,
-         "rating": rating,
-         "category": category}
+        movie
     )
     return "movie created"
 
 
 @app.put("/movies/{id}", tags=["movies"])
-def create_movie(id: int, title: str = Body(),
-                 overview: str = Body(), rating: str = Body(), year: int = Body(), category: str = Body()):
+def create_movie(id: int, movie_to_update: Movie):
 
     for movie in movies:
         if movie["id"] == id:
-            movie["title"] = title
-            movie["overview"] = overview
-            movie["year"] = year
-            movie["rating"] = rating,
-            movie["category"] = category
+            movie["title"] = movie_to_update.title
+            movie["overview"] = movie_to_update.overview
+            movie["year"] = movie_to_update.year
+            movie["rating"] = movie_to_update.rating
+            movie["category"] = movie_to_update.category
             return movie
 
 

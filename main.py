@@ -48,12 +48,12 @@ def get_movies() -> List[Movie]:
     return JSONResponse(content=movies)
 
 
-@app.get("/movies/{id}", tags=["movies"], response_model=Movie)
+@app.get("/movies/{id}", tags=["movies"], response_model=Movie, status_code=200)
 def get_movie(id: int):
     for movie in movies:
         if movie["id"] == id:
-            return JSONResponse(content=movie)
-    return JSONResponse(content=[])
+            return JSONResponse(status_code=200, content=movie)
+    return JSONResponse(status_code=404, content=[])
 
 
 @app.get("/movies/", tags=["movies"])
@@ -63,12 +63,12 @@ def get_movie_by_category(category: str = Query(min_length=5, max_length=15)):
     return JSONResponse(content=movies_by_categories)
 
 
-@app.post("/movies", tags=["movies"], response_model=dict)
+@app.post("/movies", tags=["movies"], response_model=dict, status_code=201)
 def create_movie(movie: Movie) -> dict:
     movies.append(
         movie
     )
-    return JSONResponse(content="movie created")
+    return JSONResponse(status_code=201, content="movie created")
 
 
 @app.put("/movies/{id}", tags=["movies"])
